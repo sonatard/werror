@@ -18,6 +18,15 @@ type ApplicationError struct {
     frame xerrors.Frame
 }
 
+// Here is not pointer receiver.
+func (e ApplicationError) Wrap(next error) error {
+    // set wrap error
+    e.err = next
+    // set call stack information
+    e.frame = xerrors.Caller(1)
+    return &e
+}
+
 func (e *ApplicationError) Error() string {
     return fmt.Sprintf("%s: code=%d, msg=%s", e.level, e.code, e.msg)
 }
@@ -35,16 +44,6 @@ func (e *ApplicationError) FormatError(p xerrors.Printer) (next error) {
     e.frame.Format(p)
     return e.err
 }
-
-func ApplicationErrorWithWrap(err *ApplicationError, wraperr error) error {
-    newerr := *err
-    // set call stack information
-    newerr.frame = xerrors.Caller(1)
-    // set wrap error
-    newerr.err = wraperr
-    return &newerr
-}
-
 ```
 
 Use `werror`
@@ -58,16 +57,55 @@ type ApplicationError struct {
 	werror.WrapError
 }
 
+// Here is not pointer receiver.
+func (e ApplicationError) Wrap(next error) error {
+	e.WrapError = werror.Wrap(&e, next, 2)
+	return &e
+}
+
 func (e *ApplicationError) Error() string {
 	return fmt.Sprintf("%s: code=%d, msg=%s", e.level, e.code, e.msg)
 }
+```
 
-func ApplicationErrorWithWrap(err *ApplicationError, wraperr error) error {
-	newerr := *err
-	newerr.WrapError.Msg = err.Error()
-	newerr.WrapError.Frame = xerrors.Caller(1)
-	newerr.WrapError.Err = wraperr
-	return &newerr
+Usage of your definition error
+
+```go
+package main
+
+import (
+    // Before Go 1.13
+    werror "github.com/sonatard/werror/xerrors"
+    // After Go 1.13
+    // "github.com/sonatard/werror"
+)
+
+
+
+func main() {
+    err := func1()
+    if err != nil {
+    	fmt.Fprintf(os.Stderr, "caught error: %+v\n", err)
+    }
 }
 
+func func1() {
+    var ErrUserNotFound = ApplicationError{
+    	code:  101,
+    	level: "Error",
+    	msg:   "not found",
+    }
+
+    err := func2()
+    if err != nil {
+        return ErrUserNotFound.Wrap(err)
+    }
+}
+
+func func2()error {
+    // Before Go 1.13
+    return xerrors.New("func2 error")
+    // After Go 1.13
+    // return errors.New("func2 error")
+}
 ```
