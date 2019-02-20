@@ -1,24 +1,20 @@
 package werror
 
 import (
-	"fmt"
-
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 type wrapError struct {
 	error
 	next  error
-	frame xerrors.Frame
+	frame errors.Frame
 }
 
 func (e *wrapError) Unwrap() error {
 	return e.next
 }
 
-func (e *wrapError) Format(s fmt.State, v rune) { xerrors.FormatError(e, s, v) }
-
-func (e *wrapError) FormatError(p xerrors.Printer) (next error) {
+func (e *wrapError) FormatError(p errors.Printer) (next error) {
 	p.Print(e.error.Error())
 	e.frame.Format(p)
 	return e.next
