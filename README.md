@@ -100,6 +100,8 @@ func func1() error {
     if err != nil {
         return ErrUserNotFound.Wrap(err)
     }
+    
+    return nil
 }
 
 func func2() error {
@@ -108,4 +110,15 @@ func func2() error {
     // After Go 1.13
     // return errors.New("func2 error")
 }
+```
+
+Output
+
+```
+caught error: Error: code=101, msg=not found:
+    main.func1
+        /Users/sonatard/tmp/xerrors/main.go:46
+  - func2 error:
+    main.func2
+        /Users/sonatard/tmp/xerrors/main.go:54
 ```
