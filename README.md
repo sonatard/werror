@@ -77,7 +77,7 @@ package main
 import (
     // Before Go 1.13
     werror "github.com/sonatard/werror/xerrors"
-    // After Go 1.13
+    // From Go 1.13
     // "github.com/sonatard/werror"
 )
 
