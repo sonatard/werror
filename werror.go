@@ -1,20 +1,17 @@
 package werror
 
 import (
-	"fmt"
-
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 type WrapError interface {
-	fmt.Formatter
-	xerrors.Wrapper
+	errors.Wrapper
 }
 
 func Wrap(err error, next error, calldepth int) WrapError {
 	return &wrapError{
 		error: err,
 		next:  next,
-		frame: xerrors.Caller(calldepth),
+		frame: errors.Caller(calldepth),
 	}
 }
