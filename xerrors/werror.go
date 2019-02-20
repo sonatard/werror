@@ -12,6 +12,14 @@ type WrapError struct {
 	Frame xerrors.Frame
 }
 
+func Wrap(wraperr error, cause error, calldepth int) *WrapError {
+	return &WrapError{
+		Msg:   wraperr.Error(),
+		Err:   cause,
+		Frame: xerrors.Caller(calldepth),
+	}
+}
+
 func (e *WrapError) Error() string {
 	return e.Msg
 }
