@@ -17,7 +17,7 @@ type ApplicationError struct {
 
 func (e *ApplicationError) Wrap(wraperr error) error {
 	newerr := *e
-	newerr.WrapError = werror.Wrap(e, wraperr)
+	newerr.WrapError = *werror.Wrap(e, wraperr, 2)
 	return &newerr
 }
 
