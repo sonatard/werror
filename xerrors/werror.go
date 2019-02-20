@@ -6,32 +6,15 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type WrapError struct {
-	Msg   string
-	Err   error
-	Frame xerrors.Frame
+type WrapError interface {
+	fmt.Formatter
+	Unwrap() error
 }
 
-func Wrap(wraperr error, cause error, calldepth int) *WrapError {
-	return &WrapError{
-		Msg:   wraperr.Error(),
-		Err:   cause,
-		Frame: xerrors.Caller(calldepth),
+func Wrap(err error, next error, calldepth int) WrapError {
+	return &wrapError{
+		error: err,
+		next:  next,
+		frame: xerrors.Caller(calldepth),
 	}
-}
-
-func (e *WrapError) Error() string {
-	return e.Msg
-}
-
-func (e *WrapError) Unwrap() error {
-	return e.Err
-}
-
-func (e *WrapError) Format(s fmt.State, v rune) { xerrors.FormatError(e, s, v) }
-
-func (e *WrapError) FormatError(p xerrors.Printer) (next error) {
-	p.Print(e.Msg)
-	e.Frame.Format(p)
-	return e.Err
 }

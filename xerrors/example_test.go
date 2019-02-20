@@ -15,10 +15,10 @@ type ApplicationError struct {
 	werror.WrapError
 }
 
-func (e *ApplicationError) Wrap(wraperr error) error {
-	newerr := *e
-	newerr.WrapError = *werror.Wrap(e, wraperr, 2)
-	return &newerr
+// Here is not pointer receiver.
+func (e ApplicationError) Wrap(next error) error {
+	e.WrapError = werror.Wrap(&e, next, 2)
+	return &e
 }
 
 func (e *ApplicationError) Error() string {
@@ -36,17 +36,17 @@ func Example() {
 	//     werror.WrapError
 	// }
 	//
-	// func (e *ApplicationError) Wrap(wraperr error) error {
-	//     newerr := *e
-	//     newerr.WrapError = *werror.Wrap(e, wraperr, 2)
-	//     return &newerr
+	// Here is not pointer receiver.
+	// func (e ApplicationError) Wrap(next error) error {
+	// 	e.WrapError = werror.Wrap(&e, next, 2)
+	//	return &e
 	// }
 	//
 	// func (e *ApplicationError) Error() string {
 	//     return fmt.Sprintf("%s: code=%d, msg=%s", e.level, e.code, e.msg)
 	// }
 
-	var ErrUserNotFound = &ApplicationError{
+	var ErrUserNotFound = ApplicationError{
 		code:  101,
 		level: "Error",
 		msg:   "not found",
