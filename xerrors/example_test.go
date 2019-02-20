@@ -15,6 +15,7 @@ type ApplicationError struct {
 	werror.WrapError
 }
 
+// Wrap wraps next with this error and return a new copy of the error.
 // Here is not pointer receiver.
 func (e ApplicationError) Wrap(next error) error {
 	e.WrapError = werror.Wrap(&e, next, 2)
