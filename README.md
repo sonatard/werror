@@ -57,6 +57,7 @@ type ApplicationError struct {
 	werror.WrapError
 }
 
+// Wrap wraps next with this error and return a new copy of the error.
 // Here is not pointer receiver.
 func (e ApplicationError) Wrap(next error) error {
 	e.WrapError = werror.Wrap(&e, next, 2)
@@ -81,6 +82,11 @@ import (
 )
 
 
+var ErrUserNotFound = ApplicationError{
+    code:  101,
+    level: "Error",
+    msg:   "not found",
+}
 
 func main() {
     err := func1()
@@ -89,20 +95,14 @@ func main() {
     }
 }
 
-func func1() {
-    var ErrUserNotFound = ApplicationError{
-    	code:  101,
-    	level: "Error",
-    	msg:   "not found",
-    }
-
+func func1() error {
     err := func2()
     if err != nil {
         return ErrUserNotFound.Wrap(err)
     }
 }
 
-func func2()error {
+func func2() error {
     // Before Go 1.13
     return xerrors.New("func2 error")
     // After Go 1.13
