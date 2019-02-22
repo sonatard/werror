@@ -18,6 +18,19 @@ type ApplicationError struct {
     frame xerrors.Frame
 }
 
+func NewApplicationError(level string, code int, msg string) *ApplicationError {
+    err := &ApplicationError{
+        level: level,
+        code:  code,
+        msg:   msg,
+        err:   nil,
+        frame: xerrors.Caller(1),
+    }
+
+    return err
+}
+
+
 // Here is not pointer receiver.
 func (e ApplicationError) Wrap(next error) error {
     // set wrap error
@@ -57,6 +70,18 @@ type ApplicationError struct {
 	werror.WrapError
 }
 
+func NewApplicationError(level string, code int, msg string) *ApplicationError {
+    err := &ApplicationError{
+        level: level,
+        code:  code,
+        msg:   msg,
+    }
+    err.WrapError = werror.Wrap(err, nil, 2)
+
+    return err
+}
+
+
 // Wrap wraps next with this error and return a new copy of the error.
 // Here is not pointer receiver.
 func (e ApplicationError) Wrap(next error) error {
@@ -83,17 +108,6 @@ import (
 
 
 var ErrUserNotFound = NewApplicationError("Error", 101, "not found")
-
-func NewApplicationError(level string, code int, msg string) *ApplicationError {
-    err := &ApplicationError{
-        level: level,
-        code:  code,
-        msg:   msg,
-    }
-    err.WrapError = werror.Wrap(err, nil, 2)
-
-    return err
-}
 
 func main() {
     err := func1()
