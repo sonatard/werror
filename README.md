@@ -82,10 +82,17 @@ import (
 )
 
 
-var ErrUserNotFound = ApplicationError{
-    code:  101,
-    level: "Error",
-    msg:   "not found",
+var ErrUserNotFound = NewApplicationError("Error", 101, "not found")
+
+func NewApplicationError(level string, code int, msg string) *ApplicationError {
+    err := &ApplicationError{
+        level: level,
+        code:  code,
+        msg:   msg,
+    }
+    err.WrapError = werror.Wrap(err, nil, 2)
+
+    return err
 }
 
 func main() {
