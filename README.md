@@ -48,8 +48,10 @@ func (e *ApplicationError) Unwrap() error {
     return e.err
 }
 
-// implement fmt.Formatter
-func (e *ApplicationError) Format(s fmt.State, v rune) { xerrors.FormatError(e, s, v) }
+func (e *ApplicationError) Is(err error) bool {
+    var appErr *ApplicationError
+    return xerrors.As(err, &appErr) && e.code == appErr.code
+}
 
 // implement xerrors.Formatter
 func (e *ApplicationError) FormatError(p xerrors.Printer) (next error) {
@@ -57,6 +59,11 @@ func (e *ApplicationError) FormatError(p xerrors.Printer) (next error) {
     e.frame.Format(p)
     return e.err
 }
+
+// implement fmt.Formatter
+// Remove this method from Go 1.13
+func (e *ApplicationError) Format(s fmt.State, v rune) { xerrors.FormatError(e, s, v) }
+
 ```
 
 Use `werror`
@@ -91,6 +98,11 @@ func (e ApplicationError) Wrap(next error) error {
 
 func (e *ApplicationError) Error() string {
 	return fmt.Sprintf("%s: code=%d, msg=%s", e.level, e.code, e.msg)
+}
+
+func (e *ApplicationError) Is(err error) bool {
+    var appErr *ApplicationError
+    return xerrors.As(err, &appErr) && e.code == appErr.code
 }
 ```
 
